@@ -4,9 +4,21 @@
  */
 package ca.n4dev.server
 
-import ca.n4dev.configuration.OakConfig
+import ca.n4dev.configuration.bootstrap
+import ca.n4dev.http.filter.RequestLogger
 
-fun main(args: Array<String>) {
-    val config = OakConfig("test")
-    ServerInitializer.start(config)
+fun main() {
+
+    ServerInitializer.start(
+        bootstrap("test") {
+
+            filters {
+                RequestLogger()
+            }
+
+            endpoints {
+
+            }
+        }.build()
+    )
 }

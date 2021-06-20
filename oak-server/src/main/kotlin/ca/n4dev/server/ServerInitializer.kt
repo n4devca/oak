@@ -6,7 +6,8 @@ package ca.n4dev.server
 
 import ca.n4dev.configuration.OakConfig
 import ca.n4dev.handler.OakHandler
-import ca.n4dev.http.RequestLogger
+import ca.n4dev.http.filter.HelloFilter
+import ca.n4dev.http.filter.RequestLogger
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
@@ -38,14 +39,11 @@ object ServerInitializer {
 
     private fun getHandlers() : HandlerCollection {
         val handlerCollection = HandlerCollection()
-
-        handlerCollection.addHandler(OakHandler(RequestLogger()))
-        handlerCollection.addHandler(object: AbstractHandler() {
-            override fun handle(p0: String, p1: Request, p2: HttpServletRequest, p3: HttpServletResponse) {
-                p3.sendError(404)
-            }
-
-        })
+//
+//        handlerCollection.addHandler(OakHandler(RequestLogger("Before")))
+//        handlerCollection.addHandler(OakHandler(HelloFilter()))
+//        handlerCollection.addHandler(OakHandler(RequestLogger("After")))
+//        handlerCollection.addHandler(OakHandler(HelloFilter()))
 
         return handlerCollection;
     }

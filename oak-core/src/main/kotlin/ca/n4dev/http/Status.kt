@@ -4,7 +4,7 @@
  */
 package ca.n4dev.http
 
-enum class Status(code: Int) {
+enum class Status(val code: Int) {
     OK(200),
     CREATED(201),
     NO_CONTENT(204),

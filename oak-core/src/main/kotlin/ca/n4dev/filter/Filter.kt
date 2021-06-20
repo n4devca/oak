@@ -8,5 +8,6 @@ import ca.n4dev.http.HttpRequest
 import ca.n4dev.http.HttpResponse
 
 interface Filter {
-    fun intercept(httpRequest: HttpRequest<*>?, httpResponse: HttpResponse<*>?)
+    fun intercept(httpRequest: HttpRequest, httpResponse: HttpResponse): FilterChain
+    fun name(): String = this::class.simpleName.toString()
 }

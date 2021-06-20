@@ -4,9 +4,9 @@
  */
 package ca.n4dev.filter
 
-import ca.n4dev.http.HttpRequest
 import ca.n4dev.http.HttpResponse
 
-interface FilterChain {
-    fun next(httpRequest: HttpRequest<*>, httpResponse: HttpResponse<*>)
+sealed class FilterChain {
+    data class Next(val httpResponse: HttpResponse) : FilterChain()
+    data class Completed(val httpResponse: HttpResponse) : FilterChain()
 }

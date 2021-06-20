@@ -4,4 +4,11 @@
  */
 package ca.n4dev.http
 
-class Parameter(val name: String, val value: String)
+enum class HttpMethod {
+    GET,
+    POST,
+    PUT,
+    HEAD,
+    OPTION,
+    DELETE
+}

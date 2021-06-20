@@ -4,8 +4,8 @@
  */
 package ca.n4dev.http
 
-interface HttpResponse<T> {
-    val status: Status
-    val headers: List<Header>
-    val body: T?
-}
+
+data class HttpResponse(
+    val status: Status? = null,
+    val headers: List<Header> = listOf(),
+    val body: String? = null)
