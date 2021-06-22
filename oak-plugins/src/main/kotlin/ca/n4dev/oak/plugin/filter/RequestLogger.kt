@@ -2,7 +2,7 @@
  * Copyright 2021 Remi Guillemette
  * SPDX-License-Identifier: Apache-2.0
  */
-package ca.n4dev.http.filter
+package ca.n4dev.oak.plugin.filter
 
 import ca.n4dev.filter.Filter
 import ca.n4dev.filter.FilterChain

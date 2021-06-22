@@ -10,5 +10,6 @@ enum class HttpMethod {
     PUT,
     HEAD,
     OPTION,
-    DELETE
+    DELETE,
+    ANY
 }

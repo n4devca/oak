@@ -44,7 +44,7 @@ class RouteMatcher(val endpoint: Endpoint) {
     }
 
 
-    fun match(requestedPath: String) : Match {
+    fun match(requestedPath: String) : Route? {
         pathMatcher.reset(requestedPath)
 
         val matched = pathMatcher.matches() && pathMatcher.groupCount() == pathVariableNames.size
@@ -56,17 +56,15 @@ class RouteMatcher(val endpoint: Endpoint) {
                 pathVariable to URLDecoder.decode(pathMatcher.group(index + 1), UTF_8)
             }.toMap()
 
-            Match.True(endpoint, pathVariables)
+            Route(endpoint, pathVariables)
 
         } else {
-            Match.False
+            null
         }
 
     }
 }
 
-sealed class Match {
-    data class True(val endpoint: Endpoint, val pathVariables: Map<String, String>) : Match()
-    object False : Match()
-}
+class Route (val endpoint: Endpoint, val pathVariables: Map<String, String>)
+
 

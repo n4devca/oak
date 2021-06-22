@@ -4,8 +4,9 @@
  */
 package ca.n4dev.handler
 
-import ca.n4dev.routing.Match
+import ca.n4dev.http.HttpResponse
 import ca.n4dev.routing.Router
+import ca.n4dev.utils.copyToStream
 import ca.n4dev.utils.toHttpRequest
 import ca.n4dev.utils.toHttpResponse
 import jakarta.servlet.http.HttpServletRequest
@@ -25,18 +26,30 @@ class OakHandler(private val router: Router) : AbstractHandler() {
         val httpRequest = toHttpRequest(path, request)
         val httpResponse = toHttpResponse(response)
 
+        // Get Route
         val routeMatch = router.getRoute(httpRequest, httpResponse)
 
-        when (routeMatch) {
+        if (routeMatch != null) {
 
-            is Match.True -> {
+            // Apply Security
+            // PreProcess
 
-            }
 
-            else -> {
+            // Handling
+            val handlerResponse =
+                routeMatch.endpoint.handler(httpRequest.copy(pathVariables = routeMatch.pathVariables), httpResponse)
 
-            }
+            // postProcessing
+
+            // Write
+            write(handlerResponse, response)
         }
+
+
+
+
+        baseRequest.isHandled = true
+
     }
 
     private fun routing() {
@@ -57,5 +70,14 @@ class OakHandler(private val router: Router) : AbstractHandler() {
 
     private fun postProcessing() {
 
+    }
+
+    private fun write(httpResponse: HttpResponse, response: HttpServletResponse) {
+
+        response.status = httpResponse.status?.code ?: 500
+
+        httpResponse.body?.let { body ->
+            copyToStream(body, response.outputStream)
+        }
     }
 }

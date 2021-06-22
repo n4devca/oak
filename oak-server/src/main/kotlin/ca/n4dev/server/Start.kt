@@ -5,7 +5,7 @@
 package ca.n4dev.server
 
 import ca.n4dev.configuration.bootstrap
-import ca.n4dev.http.filter.RequestLogger
+import ca.n4dev.oak.plugin.filter.RequestLogger
 
 fun main() {
 

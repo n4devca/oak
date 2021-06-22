@@ -9,7 +9,7 @@ data class HttpRequest (
     val path: String,
     val params: List<MultiParameter> = listOf(),
     val headers: List<Header> = listOf(),
-    val patchVariables: List<String> = listOf(),
+    val pathVariables: Map<String, String> = emptyMap(),
     val body: Any? = null) {
 
     fun header(name: String): String? {

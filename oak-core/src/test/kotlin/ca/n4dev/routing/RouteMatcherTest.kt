@@ -1,5 +1,6 @@
 package ca.n4dev.routing
 
+import ca.n4dev.endpoint.Endpoint
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.*
 
@@ -9,28 +10,31 @@ import org.junit.jupiter.api.Assertions.*
  */
 internal class RouteMatcherTest {
 
+    private fun getEndpoint(path: String) = Endpoint(path) { _, resp -> resp}
+
+
     @Test
     fun `should match the url`() {
-        val routerMatcher = RouteMatcher("/api/users/{userName}/profile/{profileName}")
+        val routerMatcher = RouteMatcher(getEndpoint("/api/users/{userName}/profile/{profileName}"))
 
-        assertTrue(routerMatcher.match("/api/users/bob/profile/public") is Match.True)
-        assertTrue(routerMatcher.match("/api/users/bob-42/profile/public") is Match.True)
-        assertTrue(routerMatcher.match("/api/users/bob@42.tld/profile/public") is Match.True)
+        assertNotNull(routerMatcher.match("/api/users/bob/profile/public"))
+        assertNotNull(routerMatcher.match("/api/users/bob-42/profile/public"))
+        assertNotNull(routerMatcher.match("/api/users/bob@42.tld/profile/public"))
     }
 
 
     @Test
     fun `should not match the url`() {
-        val routerMatcher = RouteMatcher("/api/users/{userName}/profile/{profileName}")
+        val routerMatcher = RouteMatcher(getEndpoint("/api/users/{userName}/profile/{profileName}"))
 
-        assertTrue(routerMatcher.match("/api/users/profile/public") is Match.False)
-        assertTrue(routerMatcher.match("/api/users/bob-42/profile") is Match.False)
-        assertTrue(routerMatcher.match("/api/users/bob@42.tld/profile/") is Match.False)
+        assertNull(routerMatcher.match("/api/users/profile/public"))
+        assertNull(routerMatcher.match("/api/users/bob-42/profile"))
+        assertNull(routerMatcher.match("/api/users/bob@42.tld/profile/"))
     }
 
     @Test
     fun `should have the parameters`() {
-        val routerMatcher = RouteMatcher("/api/users/{userName}/profile/{profileName}")
+        val routerMatcher = RouteMatcher(getEndpoint("/api/users/{userName}/profile/{profileName}"))
 
         val route1 = routerMatcher.match("/api/users/bob/profile/public")
         assertRouteMatching(route1,  mapOf("userName" to "bob", "profileName" to "public"))
@@ -47,7 +51,7 @@ internal class RouteMatcherTest {
 
     @Test
     fun `parameters should be decoded`() {
-        val routerMatcher = RouteMatcher("/api/users/{userName}/profile/{profileName}")
+        val routerMatcher = RouteMatcher(getEndpoint("/api/users/{userName}/profile/{profileName}"))
 
         assertRouteMatching(routerMatcher.match("/api/users/bob%40gg/profile/public"),
              mapOf("userName" to "bob@gg", "profileName" to "public"))
@@ -60,10 +64,10 @@ internal class RouteMatcherTest {
     }
 
 
-    private fun assertRouteMatching(routeMatch: Match, pathVariable: Map<String, String>) {
+    private fun assertRouteMatching(routeMatch: Route?, pathVariable: Map<String, String>) {
 
 
-        if (routeMatch is Match.True) {
+        if (routeMatch != null) {
             assertEquals(pathVariable.size, routeMatch.pathVariables.size)
 
             pathVariable.forEach { (k, v) ->

@@ -5,14 +5,12 @@
 package ca.n4dev.server
 
 import ca.n4dev.configuration.OakConfig
+import ca.n4dev.endpoint.Endpoint
 import ca.n4dev.handler.OakHandler
-import ca.n4dev.http.filter.HelloFilter
-import ca.n4dev.http.filter.RequestLogger
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
+import ca.n4dev.http.Status
+import ca.n4dev.routing.Router
 import org.eclipse.jetty.http2.server.HTTP2CServerConnectionFactory
 import org.eclipse.jetty.server.*
-import org.eclipse.jetty.server.handler.AbstractHandler
 import org.eclipse.jetty.server.handler.HandlerCollection
 import org.eclipse.jetty.util.thread.QueuedThreadPool
 
@@ -39,6 +37,8 @@ object ServerInitializer {
 
     private fun getHandlers() : HandlerCollection {
         val handlerCollection = HandlerCollection()
+
+        handlerCollection.addHandler(OakHandler(getRouter()))
 //
 //        handlerCollection.addHandler(OakHandler(RequestLogger("Before")))
 //        handlerCollection.addHandler(OakHandler(HelloFilter()))
@@ -70,5 +70,15 @@ object ServerInitializer {
         connector.acceptQueueSize = 10
 
         return connector
+    }
+
+    private fun getRouter(): Router {
+
+        val helloEndpoint = Endpoint("/hello/{name}") { httpRequest, httpResponse ->
+            val name = httpRequest.pathVariables["name"]
+            httpResponse.copy(Status.OK, body = "Hello $name")
+        }
+
+        return Router(setOf(helloEndpoint))
     }
 }
