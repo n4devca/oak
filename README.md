@@ -39,7 +39,7 @@ private fun helloEndpoint() = Endpoint("/hello/{name}") {
 }
 ```
 
-And calling using httpie: 
+And calling it using httpie: 
 ```shell script
 $ http :8080/hello/bob    
                         
