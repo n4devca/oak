@@ -4,12 +4,23 @@
  */
 package ca.n4dev.oak.plugin.endpoint
 
-import ca.n4dev.endpoint.Endpoint
-import ca.n4dev.http.ContentType
-import ca.n4dev.http.HttpMethod
-import ca.n4dev.http.HttpResponse
-import ca.n4dev.http.Status
+import ca.n4dev.oak.core.endpoint.Endpoint
+import ca.n4dev.oak.core.http.ContentType
+import ca.n4dev.oak.core.http.HttpMethod
+import ca.n4dev.oak.core.http.HttpResponse
+import ca.n4dev.oak.core.http.Status
 
-val NotFoundEndpoint = Endpoint("", HttpMethod.ANY, ContentType.ALL.value) { httpRequest, httpResponse ->
-    HttpResponse(Status.NOT_FOUND)
+val NotFoundEndpoint = Endpoint("", HttpMethod.ANY, ContentType.ALL.value) { httpRequest ->
+
+    val respondAsText = httpRequest.accepts().any { header ->
+        header.value.contains(ContentType.HTML.value) ||
+                header.value.contains(ContentType.TEXT.value)
+    }
+
+    if (respondAsText) {
+        HttpResponse(Status.NOT_FOUND, ContentType.HTML)
+    } else {
+        HttpResponse(Status.NOT_FOUND, ContentType.JSON)
+    }
+
 }
