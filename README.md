@@ -1,8 +1,11 @@
-/**
- * Copyright 2021 Remi Guillemette
- * SPDX-License-Identifier: Apache-2.0
- */
-package ca.n4dev.oak.server.server
+# Oak
+
+A HIGHLY experimental, MOSTLY non-functional, LARGELY untested web framework inspired by Javalin, Ktor and Spring.
+
+Obligatory hello world:
+
+```kotlin
+package test
 
 import ca.n4dev.oak.core.endpoint.Endpoint
 import ca.n4dev.oak.core.http.ContentType
@@ -35,3 +38,16 @@ private fun helloEndpoint(): Endpoint = Endpoint("/hello/{name}", HttpMethod.GET
     val name = it.pathVariables["name"]
     HttpResponse(Status.OK, ContentType.TEXT, "Hello $name")
 }
+```
+
+And calling using httpie: 
+```shell script
+$ http :8080/hello/bob    
+                        
+HTTP/1.1 200 OK
+Content-Length: 9
+Content-Type: text/plain
+Date: Wed, 23 Jun 2021 11:20:44 GMT
+
+Hello bob
+``` 
