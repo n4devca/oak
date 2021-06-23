@@ -10,7 +10,7 @@ import ca.n4dev.oak.core.http.HttpMethod
 import ca.n4dev.oak.core.http.HttpResponse
 import ca.n4dev.oak.core.http.Status
 
-val NotFoundEndpoint = Endpoint("", HttpMethod.ANY, ContentType.ALL.value) { httpRequest ->
+val NotFoundEndpoint = Endpoint("", HttpMethod.ANY, ContentType.ALL) { httpRequest ->
 
     val respondAsText = httpRequest.accepts().any { header ->
         header.value.contains(ContentType.HTML.value) ||

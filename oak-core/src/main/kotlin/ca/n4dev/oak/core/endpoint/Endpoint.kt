@@ -12,6 +12,6 @@ import ca.n4dev.oak.core.http.HttpResponse
 class Endpoint(
     val path: String,
     val method: HttpMethod = HttpMethod.GET,
-    val accept: String = ContentType.ALL.value,
+    val accept: ContentType = ContentType.ALL,
     val handler: (httpRequest: HttpRequest) -> HttpResponse
 )

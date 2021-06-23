@@ -6,7 +6,6 @@ package ca.n4dev.oak.server.server
 
 import ca.n4dev.oak.core.endpoint.Endpoint
 import ca.n4dev.oak.core.http.ContentType
-import ca.n4dev.oak.core.http.HttpMethod
 import ca.n4dev.oak.core.http.HttpResponse
 import ca.n4dev.oak.core.http.Status
 import ca.n4dev.oak.plugin.filter.RequestLoggerFilter
@@ -31,7 +30,7 @@ fun main() {
 }
 
 
-private fun helloEndpoint(): Endpoint = Endpoint("/hello/{name}", HttpMethod.GET, ContentType.JSON.value) {
+private fun helloEndpoint() = Endpoint("/hello/{name}") {
     val name = it.pathVariables["name"]
     HttpResponse(Status.OK, ContentType.TEXT, "Hello $name")
 }
