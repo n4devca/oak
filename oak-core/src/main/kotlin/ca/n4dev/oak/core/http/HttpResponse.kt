@@ -5,9 +5,10 @@
 package ca.n4dev.oak.core.http
 
 
-data class HttpResponse(
-    val status: Status,
-    val contentType: ContentType,
-    val body: String? = null,
-    val headers: List<Header> = listOf(),
+class HttpResponse (
+    var status: Status? = null,
+    var contentType: ContentType? = null,
+    var body: String? = null,
+    val headers: MutableList<Header> = mutableListOf(),
+    var final: Boolean = false
 )

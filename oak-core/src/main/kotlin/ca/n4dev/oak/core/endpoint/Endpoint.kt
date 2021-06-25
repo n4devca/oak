@@ -4,6 +4,7 @@
  */
 package ca.n4dev.oak.core.endpoint
 
+import ca.n4dev.oak.core.context.HttpContext
 import ca.n4dev.oak.core.http.ContentType
 import ca.n4dev.oak.core.http.HttpMethod
 import ca.n4dev.oak.core.http.HttpRequest
@@ -13,5 +14,5 @@ class Endpoint(
     val path: String,
     val method: HttpMethod = HttpMethod.GET,
     val accept: ContentType = ContentType.ALL,
-    val handler: (httpRequest: HttpRequest) -> HttpResponse
+    val handler: (httpContext: HttpContext) -> HttpResponse
 )

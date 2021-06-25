@@ -16,7 +16,7 @@ fun copyToStream(data: String, outputStream: OutputStream) {
     data.byteInputStream(Charset.defaultCharset()).copyTo(outputStream)
 }
 
-fun toHttpRequest(path: String, request: HttpServletRequest) : HttpRequest {
+fun toHttpRequest(path: String, pathVariables: Map<String, String>, request: HttpServletRequest) : HttpRequest {
 
     val parameters: List<MultiParameter> = request.parameterMap.map { p ->
         MultiParameter(p.key, p.value.toList())
@@ -33,5 +33,6 @@ fun toHttpRequest(path: String, request: HttpServletRequest) : HttpRequest {
         path,
         parameters,
         headers,
-        request.inputStream)
+        request.inputStream,
+        pathVariables)
 }

@@ -4,9 +4,19 @@
  */
 package ca.n4dev.oak.core.filter
 
+import ca.n4dev.oak.core.context.HttpContext
 import ca.n4dev.oak.core.http.HttpResponse
 
-sealed class FilterChain {
-    data class Next(val httpResponse: HttpResponse) : FilterChain()
-    data class Completed(val httpResponse: HttpResponse) : FilterChain()
+
+class FilterChain(private val filters: List<HttpFilter>) {
+
+    private var position = 0;
+
+    fun next(httpContext: HttpContext): HttpResponse? {
+        if (position < filters.size) {
+            return filters[position++].intercept(httpContext, this)
+        }
+
+        return null
+    }
 }

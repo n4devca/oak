@@ -5,17 +5,15 @@
 package ca.n4dev.oak.server.configuration
 
 import ca.n4dev.oak.core.endpoint.Endpoint
-import ca.n4dev.oak.core.filter.Filter
-import ca.n4dev.oak.core.filter.PostFilter
-import ca.n4dev.oak.core.filter.PreFilter
+import ca.n4dev.oak.core.filter.HttpFilter
 
 class OakConfig(
     val serverName: String,
     val port: Int = 8080,
     val host: String = "127.0.0.1",
     val endpoints: List<Endpoint>,
-    val preFilters: List<PreFilter> = emptyList(),
-    val postFilters: List<PostFilter> = emptyList()) {
+    val preFilters: List<HttpFilter> = emptyList(),
+    val postFilters: List<HttpFilter> = emptyList()) {
 }
 
 fun bootstrap(serverName: String,
@@ -35,23 +33,21 @@ class OakConfigBuilder(
     val port: Int = 8080,
     val host: String = "127.0.0.1") {
 
-    private var preFilterConfiguration: PreFilterConfiguration? = null
-    private var postFilterConfiguration: PostFilterConfiguration? = null
+    private var preFilterConfiguration: HttpFilterConfiguration? = null
+    private var postFilterConfiguration: HttpFilterConfiguration? = null
     private var endpointConfiguration: EndpointConfiguration? = null
-
-    val filters = mutableListOf<PreFilter>()
 
     fun endpoints(builder: EndpointConfiguration.() -> Unit) {
         endpointConfiguration = EndpointConfiguration().apply(builder)
     }
 
-    fun preFilters(builder: PreFilterConfiguration.() -> Unit) {
-        preFilterConfiguration = PreFilterConfiguration().apply(builder)
+    fun preFilters(builder: HttpFilterConfiguration.() -> Unit) {
+        preFilterConfiguration = HttpFilterConfiguration().apply(builder)
 
     }
 
-    fun postFilters(builder: PostFilterConfiguration.() -> Unit) {
-        postFilterConfiguration = PostFilterConfiguration().apply(builder)
+    fun postFilters(builder: HttpFilterConfiguration.() -> Unit) {
+        postFilterConfiguration = HttpFilterConfiguration().apply(builder)
     }
 
     fun build(): OakConfig {
@@ -69,16 +65,12 @@ class OakConfigBuilder(
     }
 }
 
-class PreFilterConfiguration {
-    val filters = mutableListOf<PreFilter>()
+class HttpFilterConfiguration {
+    val filters = mutableListOf<HttpFilter>()
 
-    fun add(preFilter: PreFilter) {
-        filters.add(preFilter)
+    fun add(filter: HttpFilter) {
+        filters.add(filter)
     }
-}
-
-class PostFilterConfiguration {
-    val filters = mutableListOf<PostFilter>()
 }
 
 class EndpointConfiguration {

@@ -4,13 +4,15 @@
  */
 package ca.n4dev.oak.server.handler
 
+import ca.n4dev.oak.core.context.HttpContext
+import ca.n4dev.oak.core.endpoint.Endpoint
 import ca.n4dev.oak.core.exception.FilterException
-import ca.n4dev.oak.core.filter.PostFilter
-import ca.n4dev.oak.core.filter.PreFilter
-import ca.n4dev.oak.core.http.HttpRequest
+import ca.n4dev.oak.core.filter.FilterChain
+import ca.n4dev.oak.core.filter.HttpFilter
 import ca.n4dev.oak.core.http.HttpResponse
 import ca.n4dev.oak.core.routing.Router
-import ca.n4dev.oak.plugin.endpoint.NotFoundEndpoint
+import ca.n4dev.oak.server.endpoint.StandardEndpoints
+import ca.n4dev.oak.server.filter.EndpointFilter
 import ca.n4dev.oak.server.utils.copyToStream
 import ca.n4dev.oak.server.utils.toHttpRequest
 import jakarta.servlet.http.HttpServletRequest
@@ -20,34 +22,27 @@ import org.eclipse.jetty.server.handler.AbstractHandler
 import org.slf4j.LoggerFactory
 
 class OakHandler(private val router: Router,
-                 private val preFilters: List<PreFilter> = emptyList(),
-                 private val postFilters: List<PostFilter> = emptyList()) : AbstractHandler() {
+                 private val preFilters: List<HttpFilter> = emptyList(),
+                 private val postFilters: List<HttpFilter> = emptyList()) : AbstractHandler() {
 
     private val logger = LoggerFactory.getLogger(OakHandler::class.java)
 
     override fun handle(path: String, baseRequest: Request, request: HttpServletRequest, response: HttpServletResponse) {
 
-        val httpRequest = toHttpRequest(path, request)
 
         // Get Route
-        val routeMatch = router.getRoute(httpRequest)
-        val endpoint = routeMatch?.endpoint ?: NotFoundEndpoint
-        routeMatch?.pathVariables?.toMutableMap()?.let {
-            httpRequest.pathVariables = it
-        }
+        val routeMatch = router.getRoute(path)
+        val endpoint = routeMatch?.endpoint ?: StandardEndpoints.notFound
+        val httpRequest = toHttpRequest(path, routeMatch?.pathVariables ?: mapOf(), request)
+        val httpContext = HttpContext(httpRequest)
 
         try {
 
-            val filteredRequest = applyPreFilters(httpRequest)
+            val filterChain = buildChain(preFilters, endpoint, postFilters);
 
-            // Handling
-            val handlerResponse= endpoint.handler(filteredRequest)
+            val filterResponse = filterChain.next(httpContext)
 
-            // postProcessing
-            val filteredResponse = applyPostFilters(filteredRequest, handlerResponse)
-
-            // Write
-            write(filteredResponse, response)
+            write(selectResponse(filterResponse, httpContext), response)
 
         } catch (filterException: FilterException) {
 
@@ -59,35 +54,35 @@ class OakHandler(private val router: Router,
             // log exception
         }
 
-
-
-
         // Set isHandled to true for Jetty
         baseRequest.isHandled = true
     }
 
-    /**
-     * Apply all PreFilter each time (possibly) modifying the httpRequest.
-     */
-    private fun applyPreFilters(httpRequest: HttpRequest): HttpRequest {
-        return preFilters.fold(httpRequest) { req, preFilter ->
-            preFilter.intercept(req)
-        }
+
+    private fun buildChain(preFilters: List<HttpFilter>,
+                           endpoint: Endpoint,
+                           postFilters: List<HttpFilter>): FilterChain {
+
+        return FilterChain(
+            preFilters + EndpointFilter(endpoint) + postFilters
+        )
     }
 
-    /**
-     * Apply all PostFilter each time (possibly) modifying the HttpResponse.
-     */
-    private fun applyPostFilters(httpRequest: HttpRequest, httpResponse: HttpResponse): HttpResponse {
-        return postFilters.fold(httpResponse) { response, postFilter ->
-            postFilter.intercept(httpRequest, response)
-        }
+    private fun selectResponse(httpResponse: HttpResponse?, httpContext: HttpContext): HttpResponse {
+
+        return httpResponse ?: httpContext.httpResponse ?: StandardEndpoints.notFound.handler(httpContext)
+
     }
 
     private fun write(httpResponse: HttpResponse, response: HttpServletResponse) {
 
-        response.status = httpResponse.status.code
-        response.contentType = httpResponse.contentType.value
+        response.status = httpResponse.status?.code ?: 500
+        response.contentType = httpResponse.contentType?.value
+        response.addHeader("Server", "Oak");
+
+        httpResponse.headers.forEach {
+            response.addHeader(it.name, it.value);
+        }
 
         httpResponse.body?.let { body ->
             copyToStream(body, response.outputStream)

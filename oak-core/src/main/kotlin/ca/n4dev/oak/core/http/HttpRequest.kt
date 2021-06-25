@@ -11,9 +11,8 @@ data class HttpRequest (
     val path: String,
     val params: List<MultiParameter> = listOf(),
     val headers: List<Header> = listOf(),
-    val body: InputStream? = null) {
-
-    var pathVariables: MutableMap<String, String> = mutableMapOf()
+    val body: InputStream? = null,
+    val pathVariables: Map<String, String> = mapOf()) {
 
     fun header(name: String): String? {
         return this.headers.firstOrNull {

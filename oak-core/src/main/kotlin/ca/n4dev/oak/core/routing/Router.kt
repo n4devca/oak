@@ -14,10 +14,10 @@ class Router(endpoints: Set<Endpoint>) {
         RouteMatcher(it)
     }
 
-    fun getRoute(httpRequest: HttpRequest): Route? {
+    fun getRoute(path: String): Route? {
 
         for (endpoint in endpointMatchers) {
-            val matchEndpoint = endpoint.match(httpRequest.path)
+            val matchEndpoint = endpoint.match(path)
             if (matchEndpoint != null) {
                 return matchEndpoint
             }
