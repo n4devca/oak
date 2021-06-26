@@ -12,21 +12,4 @@ data class HttpRequest (
     val params: List<MultiParameter> = listOf(),
     val headers: List<Header> = listOf(),
     val body: InputStream? = null,
-    val pathVariables: Map<String, String> = mapOf()) {
-
-    fun header(name: String): String? {
-        return this.headers.firstOrNull {
-            it.name == name
-        }?.value
-    }
-
-    fun param(name: String): List<Any>? {
-        return this.params.firstOrNull {
-            it.name == name
-        }?.value
-    }
-
-    fun accepts(): List<Header> {
-        return headers.filter { header -> header.name == HttpHeader.Accept }
-    }
-}
+    val pathVariables: Map<String, String> = mapOf())

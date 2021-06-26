@@ -12,7 +12,10 @@ import ca.n4dev.oak.core.http.ContentType
 import ca.n4dev.oak.core.http.Header
 import ca.n4dev.oak.core.http.HttpResponse
 import ca.n4dev.oak.core.http.Status
+import ca.n4dev.oak.plugin.configuration.Plugin
 import ca.n4dev.oak.plugin.filter.RequestLoggerFilter
+import ca.n4dev.oak.plugin.security.User
+import ca.n4dev.oak.plugin.security.UserService
 import ca.n4dev.oak.server.configuration.bootstrap
 
 
@@ -27,6 +30,10 @@ fun main() {
 
         endpoints {
             add(helloEndpoint())
+        }
+
+        plugin {
+            add(Plugin.basicAuth(userService))
         }
 
     }.build()
@@ -44,7 +51,13 @@ private fun enhancedBobFilter() = object : HttpFilter {
     override fun intercept(httpContext: HttpContext, chain: FilterChain): HttpResponse? {
 
         if (httpContext.httpRequest.pathVariables["name"] == "Bob") {
-            return HttpResponse(Status.OK, ContentType.TEXT, "Holy Crap! Hello Bob", mutableListOf(Header("X-Awesome", "It's Bob")), true)
+            return HttpResponse(
+                Status.OK,
+                ContentType.TEXT,
+                "Holy Crap! Hello Bob",
+                mutableListOf(Header("X-Awesome", "It's Bob")),
+                true
+            )
         }
 
         return chain.next(httpContext)
@@ -52,4 +65,22 @@ private fun enhancedBobFilter() = object : HttpFilter {
 
     override val name: String get() = "enhancedBobFilter"
 
+}
+
+private val userService = object : UserService {
+    override fun getUser(userName: String): User? {
+        return if (userName == "Bob") {
+            object : User {
+                override val userName: String
+                    get() = "Bob"
+                override val password: String
+                    get() = "\$2a\$10\$LrCwMNhqBZW3FIDGobeyxuHVKlOGUb84jo8RpvIpcHVBH6OFq/UcG"
+                override val enabled: Boolean
+                    get() = true
+
+            }
+        } else {
+            null
+        }
+    }
 }

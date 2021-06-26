@@ -18,18 +18,22 @@ import ca.n4dev.oak.server.configuration.bootstrap
 fun main() {
 
     val config = bootstrap("test-server") {
-
-        preFilters {
-            add(RequestLoggerFilter())
-        }
-
-        endpoints {
-            add(helloEndpoint())
-        }
-
-    }.build()
-
-    ServerInitializer.start(config)
+    
+            preFilters {
+                add(RequestLoggerFilter())
+            }
+    
+            endpoints {
+                add(helloEndpoint())
+            }
+    
+            plugin {
+                add(Plugin.basicAuth(userService))
+            }
+    
+        }.build()
+    
+        ServerInitializer.start(config)
 }
 
 
@@ -41,7 +45,7 @@ private fun helloEndpoint() = Endpoint("/hello/{name}") {
 
 And calling it using httpie: 
 ```shell script
-$ http :8080/hello/bob    
+$ http -a Bob:BobPassword :8080/hello/bob    
                         
 HTTP/1.1 200 OK
 Content-Length: 9

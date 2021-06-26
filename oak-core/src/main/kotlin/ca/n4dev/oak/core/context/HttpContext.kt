@@ -4,9 +4,32 @@
  */
 package ca.n4dev.oak.core.context
 
-import ca.n4dev.oak.core.http.HttpRequest
-import ca.n4dev.oak.core.http.HttpResponse
+import ca.n4dev.oak.core.http.*
 
 class HttpContext(val httpRequest: HttpRequest, var httpResponse: HttpResponse? = null) {
     var userName: String? = null
+
+    fun header(name: String): String? {
+        return httpRequest.headers.firstOrNull {
+            it.name == name
+        }?.value
+    }
+
+    fun param(name: String): List<Any>? {
+        return httpRequest.params.firstOrNull {
+            it.name == name
+        }?.value
+    }
+
+    fun accepts(): List<Header> {
+        return httpRequest.headers.filter { header -> header.name == HttpHeader.Accept }
+    }
+
+    fun isAcceptingJson(): Boolean = accepts().any { header ->
+        header.value.contains(ContentType.JSON.value)
+    }
+
+    fun isAcceptingHTML(): Boolean = accepts().any { header ->
+        header.value.contains(ContentType.HTML.value)
+    }
 }
