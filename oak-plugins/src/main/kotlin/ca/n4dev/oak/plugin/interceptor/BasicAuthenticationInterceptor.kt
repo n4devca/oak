@@ -2,11 +2,11 @@
  * Copyright 2021 Remi Guillemette
  * SPDX-License-Identifier: Apache-2.0
  */
-package ca.n4dev.oak.plugin.filter
+package ca.n4dev.oak.plugin.interceptor
 
 import ca.n4dev.oak.core.context.HttpContext
-import ca.n4dev.oak.core.filter.FilterChain
-import ca.n4dev.oak.core.filter.HttpFilter
+import ca.n4dev.oak.core.interceptor.InterceptorChain
+import ca.n4dev.oak.core.interceptor.Interceptor
 import ca.n4dev.oak.core.http.HttpHeader
 import ca.n4dev.oak.core.http.HttpResponse
 import ca.n4dev.oak.plugin.security.UserAndPassword
@@ -14,10 +14,10 @@ import ca.n4dev.oak.plugin.security.UserAndPasswordValidator
 import ca.n4dev.oak.plugin.security.createUnauthorizedResponse
 import java.util.*
 
-class BasicAuthenticationFilter(private val validator: UserAndPasswordValidator,
-                                override val name: String = "BasicAuthenticationFilter") : HttpFilter {
+class BasicAuthenticationInterceptor(private val validator: UserAndPasswordValidator,
+                                     override val name: String = "BasicAuthenticationInterceptor") : Interceptor {
 
-    override fun intercept(httpContext: HttpContext, chain: FilterChain): HttpResponse? {
+    override fun intercept(httpContext: HttpContext, chain: InterceptorChain): HttpResponse? {
 
         val authorizationHeader = httpContext.header(HttpHeader.Authorization)
         val userAndPassword: UserAndPassword? = extractUser(authorizationHeader)

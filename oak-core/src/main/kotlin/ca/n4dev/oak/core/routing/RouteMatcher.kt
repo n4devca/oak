@@ -5,8 +5,9 @@
 package ca.n4dev.oak.core.routing
 
 import ca.n4dev.oak.core.endpoint.Endpoint
+import ca.n4dev.oak.core.http.ContentType
+import ca.n4dev.oak.core.http.HttpMethod
 import java.net.URLDecoder
-import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 private const val parameterMatcher = "(\\{[a-zA-Z]+\\})"
@@ -16,12 +17,12 @@ class RouteMatcher(val endpoint: Endpoint) {
 
     private val pathVariableNames: List<String>
     private val pathRegEx: String
-    private val pathMatcher: Matcher
+    private val pathPattern: Pattern
 
     init {
         pathVariableNames = extractPathVariables(endpoint.path)
         pathRegEx = replaceWithRegEx(endpoint.path, pathVariableNames)
-        pathMatcher = Pattern.compile(pathRegEx).matcher("")
+        pathPattern = Pattern.compile(pathRegEx)
     }
 
     private fun extractPathVariables(path: String) : List<String> {
@@ -44,16 +45,26 @@ class RouteMatcher(val endpoint: Endpoint) {
     }
 
 
-    fun match(requestedPath: String) : Route? {
-        pathMatcher.reset(requestedPath)
+    fun match(requestedPath: String,
+              httpMethod: HttpMethod = HttpMethod.GET,
+              contentType: ContentType = ContentType.ALL) : Route? {
 
-        val matched = pathMatcher.matches() && pathMatcher.groupCount() == pathVariableNames.size
+        val matcher = pathPattern.matcher(requestedPath)
+
+        val handlingMethodMatched = isHandlingMethod(httpMethod, endpoint)
+        val producingContentTypeMatched = isProducingContentType(contentType, endpoint)
+
+
+        val matched = handlingMethodMatched && producingContentTypeMatched &&
+                                matcher.matches() &&
+                                matcher.groupCount() == pathVariableNames.size
+
 
         return if (matched) {
 
             val pathVariables = pathVariableNames.mapIndexed { index, pathVariable ->
                 // Start at 1 since matcher[0] is the string, not the first group
-                pathVariable to URLDecoder.decode(pathMatcher.group(index + 1), UTF_8)
+                pathVariable to URLDecoder.decode(matcher.group(index + 1), UTF_8)
             }.toMap()
 
             Route(endpoint, pathVariables)
@@ -62,6 +73,14 @@ class RouteMatcher(val endpoint: Endpoint) {
             null
         }
 
+    }
+
+    private fun isHandlingMethod(httpMethod: HttpMethod, endpoint: Endpoint): Boolean {
+        return httpMethod == HttpMethod.ANY || httpMethod == endpoint.method || endpoint.method == HttpMethod.ANY
+    }
+
+    private fun isProducingContentType(contentType: ContentType, endpoint: Endpoint): Boolean {
+        return contentType == endpoint.producing || endpoint.producing == ContentType.ALL
     }
 }
 

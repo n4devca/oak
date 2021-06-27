@@ -4,16 +4,16 @@
  */
 package ca.n4dev.oak.plugin.configuration
 
-import ca.n4dev.oak.core.filter.PluginFilter
-import ca.n4dev.oak.plugin.filter.BasicAuthenticationFilter
+import ca.n4dev.oak.core.interceptor.PluginInterceptor
+import ca.n4dev.oak.plugin.interceptor.BasicAuthenticationInterceptor
 import ca.n4dev.oak.plugin.security.UserAndPasswordValidator
 import ca.n4dev.oak.plugin.security.UserService
 import ca.n4dev.oak.plugin.security.hash.BcryptPasswordHasher
 
 object Plugin {
 
-    fun basicAuth(userService: UserService): PluginFilter {
+    fun basicAuth(userService: UserService): PluginInterceptor {
         val userAndPasswordValidator = UserAndPasswordValidator(userService, BcryptPasswordHasher())
-        return PluginFilter.PreFilter(0, BasicAuthenticationFilter(userAndPasswordValidator))
+        return PluginInterceptor.PreInterceptor(0, BasicAuthenticationInterceptor(userAndPasswordValidator))
     }
 }

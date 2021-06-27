@@ -6,13 +6,13 @@ package ca.n4dev.oak.server.handler
 
 import ca.n4dev.oak.core.context.HttpContext
 import ca.n4dev.oak.core.endpoint.Endpoint
-import ca.n4dev.oak.core.exception.FilterException
-import ca.n4dev.oak.core.filter.FilterChain
-import ca.n4dev.oak.core.filter.HttpFilter
+import ca.n4dev.oak.core.exception.InterceptorException
+import ca.n4dev.oak.core.interceptor.InterceptorChain
+import ca.n4dev.oak.core.interceptor.Interceptor
 import ca.n4dev.oak.core.http.HttpResponse
 import ca.n4dev.oak.core.routing.Router
 import ca.n4dev.oak.server.endpoint.StandardEndpoints
-import ca.n4dev.oak.server.filter.EndpointFilter
+import ca.n4dev.oak.server.interceptor.EndpointInterceptor
 import ca.n4dev.oak.server.utils.copyToStream
 import ca.n4dev.oak.server.utils.toHttpRequest
 import jakarta.servlet.http.HttpServletRequest
@@ -22,8 +22,8 @@ import org.eclipse.jetty.server.handler.AbstractHandler
 import org.slf4j.LoggerFactory
 
 class OakHandler(private val router: Router,
-                 private val preFilters: List<HttpFilter> = emptyList(),
-                 private val postFilters: List<HttpFilter> = emptyList()) : AbstractHandler() {
+                 private val preInterceptors: List<Interceptor> = emptyList(),
+                 private val postInterceptors: List<Interceptor> = emptyList()) : AbstractHandler() {
 
     private val logger = LoggerFactory.getLogger(OakHandler::class.java)
 
@@ -38,16 +38,16 @@ class OakHandler(private val router: Router,
 
         try {
 
-            val filterChain = buildChain(preFilters, endpoint, postFilters);
+            val interceptorChain = buildChain(preInterceptors, endpoint, postInterceptors);
 
-            val filterResponse = filterChain.next(httpContext)
+            val interceptorsResponse = interceptorChain.next(httpContext)
 
-            write(selectResponse(filterResponse, httpContext), response)
+            write(selectResponse(interceptorsResponse, httpContext), response)
 
-        } catch (filterException: FilterException) {
+        } catch (interceptorException: InterceptorException) {
 
             // Handler...
-            logger.info("Filter exception. Handling response...")
+            logger.info("Interceptor exception. Handling response...")
 
         } catch (exception: Exception) {
             logger.error("Unplanned exception!")
@@ -59,12 +59,12 @@ class OakHandler(private val router: Router,
     }
 
 
-    private fun buildChain(preFilters: List<HttpFilter>,
+    private fun buildChain(preInterceptors: List<Interceptor>,
                            endpoint: Endpoint,
-                           postFilters: List<HttpFilter>): FilterChain {
+                           postInterceptors: List<Interceptor>): InterceptorChain {
 
-        return FilterChain(
-            preFilters + EndpointFilter(endpoint) + postFilters
+        return InterceptorChain(
+            preInterceptors + EndpointInterceptor(endpoint) + postInterceptors
         )
     }
 

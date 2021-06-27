@@ -6,14 +6,14 @@ package ca.n4dev.oak.server.server
 
 import ca.n4dev.oak.core.context.HttpContext
 import ca.n4dev.oak.core.endpoint.Endpoint
-import ca.n4dev.oak.core.filter.FilterChain
-import ca.n4dev.oak.core.filter.HttpFilter
+import ca.n4dev.oak.core.interceptor.InterceptorChain
+import ca.n4dev.oak.core.interceptor.Interceptor
 import ca.n4dev.oak.core.http.ContentType
 import ca.n4dev.oak.core.http.Header
 import ca.n4dev.oak.core.http.HttpResponse
 import ca.n4dev.oak.core.http.Status
 import ca.n4dev.oak.plugin.configuration.Plugin
-import ca.n4dev.oak.plugin.filter.RequestLoggerFilter
+import ca.n4dev.oak.plugin.interceptor.RequestLoggerInterceptor
 import ca.n4dev.oak.plugin.security.User
 import ca.n4dev.oak.plugin.security.UserService
 import ca.n4dev.oak.server.configuration.bootstrap
@@ -23,9 +23,9 @@ fun main() {
 
     val config = bootstrap("test-server") {
 
-        preFilters {
-            add(RequestLoggerFilter())
-            add(enhancedBobFilter())
+        preInterceptors {
+            add(RequestLoggerInterceptor())
+            add(enhancedBobInterceptor())
         }
 
         endpoints {
@@ -47,8 +47,8 @@ private fun helloEndpoint() = Endpoint("/hello/{name}") {
     HttpResponse(Status.OK, ContentType.TEXT, "Hello $name")
 }
 
-private fun enhancedBobFilter() = object : HttpFilter {
-    override fun intercept(httpContext: HttpContext, chain: FilterChain): HttpResponse? {
+private fun enhancedBobInterceptor() = object : Interceptor {
+    override fun intercept(httpContext: HttpContext, chain: InterceptorChain): HttpResponse? {
 
         if (httpContext.httpRequest.pathVariables["name"] == "Bob") {
             return HttpResponse(
@@ -63,7 +63,7 @@ private fun enhancedBobFilter() = object : HttpFilter {
         return chain.next(httpContext)
     }
 
-    override val name: String get() = "enhancedBobFilter"
+    override val name: String get() = "enhancedBobInterceptor"
 
 }
 

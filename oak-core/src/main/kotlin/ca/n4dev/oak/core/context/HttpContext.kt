@@ -15,21 +15,25 @@ class HttpContext(val httpRequest: HttpRequest, var httpResponse: HttpResponse? 
         }?.value
     }
 
-    fun param(name: String): List<Any>? {
+    fun param(name: String): List<String>? {
         return httpRequest.params.firstOrNull {
             it.name == name
         }?.value
     }
 
-    fun accepts(): List<Header> {
-        return httpRequest.headers.filter { header -> header.name == HttpHeader.Accept }
+    fun accepts(): List<String> {
+        val acceptHeader = httpRequest.headers.filter { header -> header.name == HttpHeader.Accept }
+
+        return acceptHeader.flatMap {
+            it.value.split(",")
+        }.map { it.trim() }
     }
 
-    fun isAcceptingJson(): Boolean = accepts().any { header ->
-        header.value.contains(ContentType.JSON.value)
+    fun isAcceptingJson(): Boolean = accepts().any { accept ->
+        accept.contains(ContentType.JSON.value) || accept.contains(ContentType.ALL.value)
     }
 
-    fun isAcceptingHTML(): Boolean = accepts().any { header ->
-        header.value.contains(ContentType.HTML.value)
+    fun isAcceptingHTML(): Boolean = accepts().any { accept ->
+        accept.contains(ContentType.HTML.value) || accept.contains(ContentType.ALL.value)
     }
 }

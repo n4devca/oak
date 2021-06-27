@@ -4,5 +4,5 @@
  */
 package ca.n4dev.oak.core.exception
 
-class FilterException : Exception() {
+class InterceptorException : Exception() {
 }

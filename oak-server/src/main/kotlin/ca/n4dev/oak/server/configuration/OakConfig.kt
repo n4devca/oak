@@ -5,16 +5,16 @@
 package ca.n4dev.oak.server.configuration
 
 import ca.n4dev.oak.core.endpoint.Endpoint
-import ca.n4dev.oak.core.filter.HttpFilter
-import ca.n4dev.oak.core.filter.PluginFilter
+import ca.n4dev.oak.core.interceptor.Interceptor
+import ca.n4dev.oak.core.interceptor.PluginInterceptor
 
 class OakConfig(
     val serverName: String,
     val port: Int = 8080,
     val host: String = "127.0.0.1",
     val endpoints: List<Endpoint>,
-    val preFilters: List<HttpFilter> = emptyList(),
-    val postFilters: List<HttpFilter> = emptyList()) {
+    val preInterceptors: List<Interceptor> = emptyList(),
+    val postInterceptors: List<Interceptor> = emptyList()) {
 }
 
 fun bootstrap(serverName: String,
@@ -34,8 +34,8 @@ class OakConfigBuilder(
     val port: Int = 8080,
     val host: String = "127.0.0.1") {
 
-    private var preFilterConfiguration: HttpFilterConfiguration? = null
-    private var postFilterConfiguration: HttpFilterConfiguration? = null
+    private var preInterceptorsConfiguration: InterceptorConfiguration? = null
+    private var postInterceptorsConfiguration: InterceptorConfiguration? = null
     private var endpointConfiguration: EndpointConfiguration? = null
     private var pluginConfiguration: PluginConfiguration? = null
 
@@ -43,12 +43,12 @@ class OakConfigBuilder(
         endpointConfiguration = EndpointConfiguration().apply(builder)
     }
 
-    fun preFilters(builder: HttpFilterConfiguration.() -> Unit) {
-        preFilterConfiguration = HttpFilterConfiguration().apply(builder)
+    fun preInterceptors(builder: InterceptorConfiguration.() -> Unit) {
+        preInterceptorsConfiguration = InterceptorConfiguration().apply(builder)
     }
 
-    fun postFilters(builder: HttpFilterConfiguration.() -> Unit) {
-        postFilterConfiguration = HttpFilterConfiguration().apply(builder)
+    fun postInterceptors(builder: InterceptorConfiguration.() -> Unit) {
+        postInterceptorsConfiguration = InterceptorConfiguration().apply(builder)
     }
 
     fun plugin(builder: PluginConfiguration.() -> Unit) {
@@ -58,25 +58,25 @@ class OakConfigBuilder(
     fun build(): OakConfig {
 
         val endpoints = safeList(endpointConfiguration?.endpoints)
-        val preFilters = safeList(preFilterConfiguration?.filters)
-        val postfilters = safeList(postFilterConfiguration?.filters)
+        val preInterceptors = safeList(preInterceptorsConfiguration?.interceptors)
+        val postInterceptors = safeList(postInterceptorsConfiguration?.interceptors)
 
-        pluginConfiguration?.pluginFilters?.forEach {
+        pluginConfiguration?.pluginInterceptors?.forEach {
 
             when (it) {
 
-                is PluginFilter.PreFilter -> {
-                    preFilters.add(it.position, it.filter)
+                is PluginInterceptor.PreInterceptor -> {
+                    preInterceptors.add(it.position, it.interceptor)
                 }
 
-                is PluginFilter.PostFilter -> {
-                    postfilters.add(it.filter)
+                is PluginInterceptor.PostInterceptor -> {
+                    postInterceptors.add(it.interceptor)
                 }
             }
         }
 
 
-        return OakConfig(serverName, port, host, endpoints, preFilters, postfilters)
+        return OakConfig(serverName, port, host, endpoints, preInterceptors, postInterceptors)
     }
 
     private fun <T : Any> initConfig(config: T, init: T.() -> Unit): T {
@@ -85,11 +85,11 @@ class OakConfigBuilder(
     }
 }
 
-class HttpFilterConfiguration {
-    val filters = mutableListOf<HttpFilter>()
+class InterceptorConfiguration {
+    val interceptors = mutableListOf<Interceptor>()
 
-    fun add(filter: HttpFilter) {
-        filters.add(filter)
+    fun add(interceptor: Interceptor) {
+        interceptors.add(interceptor)
     }
 }
 
@@ -103,10 +103,10 @@ class EndpointConfiguration {
 
 class PluginConfiguration {
 
-    val pluginFilters = mutableListOf<PluginFilter>()
+    val pluginInterceptors = mutableListOf<PluginInterceptor>()
 
-    fun add(pluginFilter: PluginFilter) {
-        pluginFilters.add(pluginFilter)
+    fun add(pluginInterceptor: PluginInterceptor) {
+        pluginInterceptors.add(pluginInterceptor)
     }
 }
 

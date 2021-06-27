@@ -2,10 +2,11 @@ package ca.n4dev.oak.core.routing
 
 import ca.n4dev.oak.core.endpoint.Endpoint
 import ca.n4dev.oak.core.http.ContentType
+import ca.n4dev.oak.core.http.HttpMethod
 import ca.n4dev.oak.core.http.HttpResponse
 import ca.n4dev.oak.core.http.Status
-import org.junit.Test
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 
 /**
  * Copyright 2021 Remi Guillemette
@@ -33,6 +34,35 @@ internal class RouteMatcherTest {
         assertNull(routerMatcher.match("/api/users/profile/public"))
         assertNull(routerMatcher.match("/api/users/bob-42/profile"))
         assertNull(routerMatcher.match("/api/users/bob@42.tld/profile/"))
+    }
+
+    @Test
+    fun `should only match endpoint with ContentType`() {
+        val endpoint = Endpoint("/api/users/{userName}", producing = ContentType.JSON) { _ -> HttpResponse(Status.OK, ContentType.JSON) }
+        val routerMatcher = RouteMatcher(endpoint)
+
+        assertNotNull(routerMatcher.match("/api/users/bob", HttpMethod.ANY, ContentType.JSON))
+        assertNull(routerMatcher.match("/api/users/bob-42", HttpMethod.ANY, ContentType.HTML))
+        assertNull(routerMatcher.match("/api/users/bob/profile/", HttpMethod.ANY, ContentType.JSON))
+
+    }
+
+    @Test
+    fun `should only match endpoint with Method`() {
+        val getEndpoint = Endpoint("/api/users/{userName}", producing = ContentType.JSON) { _ -> HttpResponse(Status.OK, ContentType.JSON) }
+        val getRouterMatcher = RouteMatcher(getEndpoint)
+
+        assertNotNull(getRouterMatcher.match("/api/users/bob", HttpMethod.ANY, ContentType.JSON))
+        assertNotNull(getRouterMatcher.match("/api/users/bob", HttpMethod.GET, ContentType.JSON))
+        assertNull(getRouterMatcher.match("/api/users/bob", HttpMethod.POST, ContentType.JSON))
+
+        val anyEndpoint = Endpoint("/api/users/{userName}", HttpMethod.ANY, ContentType.JSON) { _ -> HttpResponse(Status.OK, ContentType.JSON) }
+        val anyRouterMatcher = RouteMatcher(anyEndpoint)
+
+        assertNotNull(anyRouterMatcher.match("/api/users/bob", HttpMethod.ANY, ContentType.JSON))
+        assertNotNull(anyRouterMatcher.match("/api/users/bob", HttpMethod.GET, ContentType.JSON))
+        assertNotNull(anyRouterMatcher.match("/api/users/bob", HttpMethod.POST, ContentType.JSON))
+
     }
 
     @Test
@@ -65,7 +95,6 @@ internal class RouteMatcherTest {
         assertRouteMatching(routerMatcher.match("/api/users/bob/profile/public%2Blife"),
              mapOf("userName" to "bob", "profileName" to "public+life"))
     }
-
 
     private fun assertRouteMatching(routeMatch: Route?, pathVariable: Map<String, String>) {
 

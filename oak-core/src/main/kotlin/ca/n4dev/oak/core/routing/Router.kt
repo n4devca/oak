@@ -5,8 +5,6 @@
 package ca.n4dev.oak.core.routing
 
 import ca.n4dev.oak.core.endpoint.Endpoint
-import ca.n4dev.oak.core.http.HttpRequest
-import ca.n4dev.oak.core.http.HttpResponse
 
 class Router(endpoints: Set<Endpoint>) {
 

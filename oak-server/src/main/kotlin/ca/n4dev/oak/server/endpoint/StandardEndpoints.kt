@@ -13,15 +13,16 @@ import ca.n4dev.oak.core.http.Status
 
 private fun createEndpoint(status: Status) = Endpoint("*", HttpMethod.ANY, ContentType.ALL) { httpContext ->
 
-    val respondAsText = httpContext.accepts().any { header ->
-        header.value.contains(ContentType.HTML.value) ||
-                header.value.contains(ContentType.TEXT.value)
-    }
-
-    if (respondAsText) {
-        HttpResponse(status, ContentType.HTML)
-    } else {
-        HttpResponse(status, ContentType.JSON)
+    when {
+        httpContext.isAcceptingHTML() -> {
+            HttpResponse(status, ContentType.HTML)
+        }
+        httpContext.isAcceptingJson() -> {
+            HttpResponse(status, ContentType.JSON)
+        }
+        else -> {
+            HttpResponse(status, ContentType.TEXT)
+        }
     }
 }
 

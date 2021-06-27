@@ -38,7 +38,7 @@ object ServerInitializer {
 
         val router = Router(oakConfig.endpoints.toSet())
 
-        handlerCollection.addHandler(OakHandler(router, oakConfig.preFilters, oakConfig.postFilters))
+        handlerCollection.addHandler(OakHandler(router, oakConfig.preInterceptors, oakConfig.postInterceptors))
 
         return handlerCollection;
     }
