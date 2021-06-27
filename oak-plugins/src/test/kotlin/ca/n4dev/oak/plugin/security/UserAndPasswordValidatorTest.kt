@@ -1,6 +1,5 @@
 package ca.n4dev.oak.plugin.security
 
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertTrue
 
@@ -52,8 +51,8 @@ internal class UserAndPasswordValidatorTest {
         return object : PasswordHasher {
             override fun hash(password: String): String = password
 
-            override fun validate(plainPassword: String, hash: String): Boolean {
-                return plainPassword == hash
+            override fun validate(plainPassword: String, hashed: String): Boolean {
+                return plainPassword == hashed
             }
 
         }

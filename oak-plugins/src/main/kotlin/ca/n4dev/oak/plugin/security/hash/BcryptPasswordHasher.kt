@@ -13,7 +13,7 @@ class BcryptPasswordHasher: PasswordHasher {
         return BCrypt.hashpw(password, BCrypt.gensalt())
     }
 
-    override fun validate(hash: String, password: String): Boolean {
-        return BCrypt.checkpw(password, hash)
+    override fun validate(plainPassword: String, hashed: String): Boolean {
+        return BCrypt.checkpw(plainPassword, hashed)
     }
 }

@@ -14,8 +14,8 @@ interface PasswordHasher {
     /**
      * Validate if an hash match this password
      * @param plainPassword A password to test.
-     * @param hash The hash (probably coming from your persistence)
+     * @param hashed The hash (probably coming from your persistence)
      */
-    fun validate(plainPassword: String, hash: String): Boolean
+    fun validate(plainPassword: String, hashed: String): Boolean
 
 }
