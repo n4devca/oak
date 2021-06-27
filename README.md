@@ -1,5 +1,7 @@
 # Oak
 
+![Status](https://github.com/n4devca/oak/actions/workflows/pipeline-maven.yml/badge.svg)
+
 A HIGHLY experimental, MOSTLY non-functional, LARGELY untested web framework inspired by Javalin, Ktor and Spring.
 
 Obligatory hello world:
