@@ -7,7 +7,7 @@ package ca.n4dev.oak.plugin.security
 class UserAndPasswordValidator(private val userService: UserService,
                                private val passwordHasher: PasswordHasher) {
 
-    fun authenticate(usernameAndPassword: UserAndPassword): Boolean {
+    fun validate(usernameAndPassword: UserAndPassword): Boolean {
 
         return try {
 

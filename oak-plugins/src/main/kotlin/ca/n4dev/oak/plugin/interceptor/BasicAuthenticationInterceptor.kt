@@ -22,7 +22,7 @@ class BasicAuthenticationInterceptor(private val validator: UserAndPasswordValid
         val authorizationHeader = httpContext.header(HttpHeader.Authorization)
         val userAndPassword: UserAndPassword? = extractUser(authorizationHeader)
 
-        return if (userAndPassword != null && validator.authenticate(userAndPassword)) {
+        return if (userAndPassword != null && validator.validate(userAndPassword)) {
             httpContext.userName = userAndPassword.userName
             chain.next(httpContext)
         } else {

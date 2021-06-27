@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Test
  * Copyright 2021 Remi Guillemette
  * SPDX-License-Identifier: Apache-2.0
  */
-internal class HttpContextTest {
+class HttpContextTest {
 
     @Test
-    fun `non existing header should return null`() {
+    internal fun `non existing header should return null`() {
         val req = HttpRequest(HttpMethod.GET, "/test")
 
         val ctx = HttpContext(req)

@@ -7,6 +7,7 @@ import ca.n4dev.oak.core.http.HttpRequest
 import ca.n4dev.oak.core.http.HttpResponse
 import org.junit.jupiter.api.Test
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 /**
  * Copyright 2021 Remi Guillemette
@@ -24,8 +25,8 @@ internal class InterceptorChainTest {
 
         val httpResponse = interceptorChain.next(httpContext)
 
-        assertNotNull(httpResponse)
-
+        assertNull(httpResponse)
+        assertNotNull(httpContext.httpResponse)
     }
 
     @Test
